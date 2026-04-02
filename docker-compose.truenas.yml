@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  wakedeck:
+    image: wakedeck:latest
+    container_name: wakedeck
+    network_mode: host
+    user: "568:568"
+    volumes:
+      - /mnt/storage/Apps/wakedeck/data:/app/data
+    environment:
+      - SECRET_KEY=_2dKMHDEBm8BC6ljTdrMHYM5c7LSWnVAmnNNFYE9Z9FVDitOIoUhQJkKPXfqInvq
+      - PORT=36912
+      - DATA_DIR=/app/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50' # Max 50% of 1 CPU core
+          memory: 256M # Max 256MB RAM
+        reservations:
+          cpus: '0.10' # Guaranteed 10% CPU
+          memory: 64M # Guaranteed 64MB RAM

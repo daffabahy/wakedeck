@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  wakedeck:
+    build: .
+    container_name: wakedeck
+    network_mode: host
+    volumes:
+      - ./data:/app/data
+    environment:
+      - SECRET_KEY=_2dKMHDEBm8BC6ljTdrMHYM5c7LSWnVAmnNNFYE9Z9FVDitOIoUhQJkKPXfqInvq
+      - PORT=36912
+    restart: unless-stopped

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WakeDeck</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="toast-container"></div>
+
+    <div id="app-container">
+        <!-- Auth View -->
+        <div id="auth-view" class="view hidden">
+            <div class="auth-wrapper">
+                <div class="auth-box">
+                    <div class="logo">
+                        <img src="/favicon.png" alt="Logo" style="width: 28px; height: 28px; filter: drop-shadow(0 0 8px rgba(99,102,241,0.5));">
+                        <h2 style="margin-left: 8px;">WakeDeck</h2>
+                    </div>
+
+                    <form id="setup-form" class="hidden">
+                        <p class="auth-subtitle">Create an admin account to get started.</p>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="setup-username" required placeholder="admin">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="setup-password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn-primary w-100" id="btn-setup">
+                            Initialize <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </form>
+
+                    <form id="login-form" class="hidden">
+                        <p class="auth-subtitle">Sign in to your dashboard.</p>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="login-username" required placeholder="admin">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="login-password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn-primary w-100" id="btn-login">
+                            Sign In <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view hidden">
+            <!-- Mobile overlay -->
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+            <!-- Sidebar -->
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-brand">
+                        <img src="/favicon.png" alt="Logo" style="width: 24px; height: 24px; filter: drop-shadow(0 0 5px rgba(99,102,241,0.5));">
+                        <span style="margin-left: 8px; font-weight: 700;">WakeDeck</span>
+                    </div>
+                    <button class="sidebar-close" id="sidebar-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="sidebar-menu">
+                    <a href="#devices" class="menu-item active" data-target="devices"><i class="fa-solid fa-desktop"></i> Devices</a>
+                    <a href="#schedules" class="menu-item" data-target="schedules"><i class="fa-regular fa-clock"></i> Schedules</a>
+                    <a href="#history" class="menu-item" data-target="history"><i class="fa-solid fa-list"></i> Activity</a>
+                    <a href="#settings" class="menu-item" data-target="settings"><i class="fa-solid fa-gear"></i> Settings</a>
+                </div>
+                <div class="sidebar-footer">
+                    <button id="btn-logout" class="btn-ghost w-100"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="content-area">
+                <header class="topbar">
+                    <div class="topbar-left">
+                        <button class="mobile-menu-btn" id="mobile-menu-btn">
+                            <i class="fa-solid fa-bars"></i>
+                        </button>
+                        <h1 id="page-title">Devices</h1>
+                    </div>
+                    <div class="user-profile">
+                        <span id="current-username">Admin</span>
+                        <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                    </div>
+                </header>
+
+                <div class="content-wrapper">
+                    <!-- Devices -->
+                    <section id="section-devices" class="content-section active">
+                        <div class="section-actions">
+                            <button class="btn-primary" onclick="openDeviceModal()"><i class="fa-solid fa-plus"></i> Add Device</button>
+                            <button class="btn-secondary" onclick="refreshDevices()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                            <button class="btn-secondary" onclick="scanNetwork()"><i class="fa-solid fa-wifi"></i> Scan LAN</button>
+                        </div>
+                        <div class="device-grid" id="devices-container">
+                            <div class="loading-state"><div class="spinner"></div></div>
+                        </div>
+                    </section>
+
+                    <!-- Schedules -->
+                    <section id="section-schedules" class="content-section">
+                        <div class="section-actions">
+                            <button class="btn-primary" onclick="openScheduleModal()"><i class="fa-solid fa-plus"></i> Add Schedule</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Device</th>
+                                        <th>Action</th>
+                                        <th>Cron</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schedules-tbody"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- History -->
+                    <section id="section-history" class="content-section">
+                        <div class="section-actions right">
+                            <button class="btn-danger" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Clear</button>
+                        </div>
+                        <div class="log-container" id="history-container"></div>
+                    </section>
+
+                    <!-- Settings -->
+                    <section id="section-settings" class="content-section">
+                        <div class="settings-card">
+                            <h3><i class="fa-solid fa-key"></i> SSH Key Authentication</h3>
+                            <p>Copy this public key to your target PC's <code>~/.ssh/authorized_keys</code> file.</p>
+                            <div class="form-group">
+                                <label>Public Key (auto-generated)</label>
+                                <textarea id="set-ssh-pubkey" readonly rows="3" style="width:100%;padding:0.5rem 0.65rem;background:var(--bg-2);border:1px solid var(--border-strong);border-radius:var(--radius-md);color:var(--text-secondary);font-family:'SF Mono',monospace;font-size:0.75rem;resize:none;"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn-secondary" onclick="copySSHKey()"><i class="fa-solid fa-copy"></i> Copy Key</button>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <h3><i class="fa-solid fa-clock"></i> Timezone</h3>
+                            <p>Set your timezone for correct activity timestamps.</p>
+                            <div class="form-group">
+                                <label>Timezone</label>
+                                <select id="set-timezone" class="custom-select" onchange="saveTimezone()">
+                                    <option value="UTC-12">UTC-12</option><option value="UTC-11">UTC-11</option>
+                                    <option value="UTC-10">UTC-10 (Hawaii)</option><option value="UTC-9">UTC-9 (Alaska)</option>
+                                    <option value="UTC-8">UTC-8 (Pacific)</option><option value="UTC-7">UTC-7 (Mountain)</option>
+                                    <option value="UTC-6">UTC-6 (Central US)</option><option value="UTC-5">UTC-5 (Eastern US)</option>
+                                    <option value="UTC-4">UTC-4 (Atlantic)</option><option value="UTC-3">UTC-3 (Brazil)</option>
+                                    <option value="UTC-2">UTC-2</option><option value="UTC-1">UTC-1</option>
+                                    <option value="UTC+0">UTC+0 (London)</option><option value="UTC+1">UTC+1 (Paris)</option>
+                                    <option value="UTC+2">UTC+2 (Cairo)</option><option value="UTC+3">UTC+3 (Moscow)</option>
+                                    <option value="UTC+4">UTC+4 (Dubai)</option><option value="UTC+5">UTC+5 (Pakistan)</option>
+                                    <option value="UTC+6">UTC+6 (Bangladesh)</option>
+                                    <option value="UTC+7">UTC+7 (Jakarta / WIB)</option>
+                                    <option value="UTC+8">UTC+8 (Singapore / WITA)</option>
+                                    <option value="UTC+9">UTC+9 (Tokyo / WIT)</option>
+                                    <option value="UTC+10">UTC+10 (Sydney)</option><option value="UTC+11">UTC+11</option>
+                                    <option value="UTC+12">UTC+12 (Auckland)</option>
+                                    <option value="UTC+13">UTC+13</option><option value="UTC+14">UTC+14</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <h3><i class="fa-brands fa-discord"></i> Discord Webhook</h3>
+                            <p>Webhook URLs are hidden after saving for security.</p>
+                            <div id="discord-status"></div>
+                            <div id="discord-form-area">
+                                <div class="form-group">
+                                    <label>Webhook URL</label>
+                                    <input type="text" id="set-discord-url" placeholder="https://discord.com/api/webhooks/...">
+                                </div>
+                                <div class="form-actions" style="gap:0.5rem;">
+                                    <button class="btn-secondary" onclick="saveDiscordWebhook()"><i class="fa-solid fa-check"></i> Save</button>
+                                    <button class="btn-secondary" onclick="testDiscordWebhook()"><i class="fa-solid fa-paper-plane"></i> Test</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <h3><i class="fa-brands fa-telegram"></i> Telegram Bot</h3>
+                            <p>Bot token and chat ID are hidden after saving for security.</p>
+                            <div id="telegram-status"></div>
+                            <div id="telegram-form-area">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Bot Token</label>
+                                        <input type="text" id="set-telegram-token" placeholder="123456:ABC-DEF...">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Chat ID</label>
+                                        <input type="text" id="set-telegram-chat" placeholder="-1001234567890">
+                                    </div>
+                                </div>
+                                <div class="form-actions" style="gap:0.5rem;">
+                                    <button class="btn-secondary" onclick="saveTelegramBot()"><i class="fa-solid fa-check"></i> Save</button>
+                                    <button class="btn-secondary" onclick="testTelegramBot()"><i class="fa-solid fa-paper-plane"></i> Test</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settings-card">
+                            <h3><i class="fa-solid fa-bell"></i> Notification Triggers</h3>
+                            <p>Choose when to send notifications.</p>
+                            <div class="checkbox-group" style="margin-bottom:0.5rem;">
+                                <input type="checkbox" id="set-notify-wake" checked>
+                                <label for="set-notify-wake">Wake-on-LAN sent</label>
+                            </div>
+                            <div class="checkbox-group" style="margin-bottom:0.5rem;">
+                                <input type="checkbox" id="set-notify-shutdown" checked>
+                                <label for="set-notify-shutdown">Shutdown / Restart</label>
+                            </div>
+                            <div class="checkbox-group" style="margin-bottom:0.5rem;">
+                                <input type="checkbox" id="set-notify-offline" checked>
+                                <label for="set-notify-offline">Device goes offline</label>
+                            </div>
+                            <div class="form-actions" style="margin-top:0.75rem;">
+                                <button class="btn-primary" onclick="saveTriggerSettings()"><i class="fa-solid fa-check"></i> Save Triggers</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Device Modal -->
+    <div id="modal-device" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="device-modal-title">Add Device</h3>
+                <button class="close-modal" onclick="closeModal('modal-device')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="device-form">
+                    <input type="hidden" id="dev-id">
+                    <div class="form-group">
+                        <label>Device Name</label>
+                        <input type="text" id="dev-name" required placeholder="e.g. Workstation">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>IP Address</label>
+                            <input type="text" id="dev-ip" required placeholder="192.168.1.10">
+                        </div>
+                        <div class="form-group">
+                            <label>MAC Address</label>
+                            <input type="text" id="dev-mac" required placeholder="AA:BB:CC:DD:EE:FF">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Operating System</label>
+                        <select id="dev-os" class="custom-select">
+                            <option value="windows">Windows</option>
+                            <option value="linux">Linux</option>
+                        </select>
+                    </div>
+                    <p class="settings-subtitle">SSH Credentials (for remote shutdown)</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>SSH Username</label>
+                            <input type="text" id="dev-ssh-user" placeholder="Administrator">
+                        </div>
+                        <div class="form-group">
+                            <label>SSH Password</label>
+                            <input type="password" id="dev-ssh-pass" placeholder="Leave blank to keep existing">
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="closeModal('modal-device')">Cancel</button>
+                        <button type="submit" class="btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan Modal -->
+    <div id="modal-scan" class="modal-overlay hidden">
+        <div class="modal wide-modal">
+            <div class="modal-header">
+                <h3>Network Scan</h3>
+                <button class="close-modal" onclick="closeModal('modal-scan')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="scan-loading" style="text-align:center;padding:2rem;">
+                    <div class="spinner"></div>
+                    <p style="margin-top:0.75rem;color:var(--text-tertiary);">Scanning local network...</p>
+                </div>
+                <div class="table-container hidden" id="scan-results-container">
+                    <table class="data-table">
+                        <thead><tr><th>IP</th><th>MAC</th><th></th></tr></thead>
+                        <tbody id="scan-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="modal-schedule" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="schedule-modal-title">Create Schedule</h3>
+                <button class="close-modal" onclick="closeModal('modal-schedule')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="schedule-form">
+                    <input type="hidden" id="sch-id">
+                    <div class="form-group">
+                        <label>Target Device</label>
+                        <select id="sch-device" required class="custom-select"></select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Action</label>
+                            <select id="sch-action" required class="custom-select">
+                                <option value="wake">Wake (WoL)</option>
+                                <option value="shutdown">Shutdown (SSH)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cron Expression</label>
+                            <input type="text" id="sch-cron" required placeholder="0 8 * * 1-5">
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="sch-enabled" checked>
+                        <label for="sch-enabled">Enable this schedule</label>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="closeModal('modal-schedule')">Cancel</button>
+                        <button type="submit" class="btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# =========================
+# Python & Virtual Environments
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# =========================
+# Database & Config Data
+# =========================
+# Ignore the data directory where SQLite DB and SSH keys are stored
+data/
+*.sqlite
+*.sqlite3
+*.db
+
+# =========================
+# Build Artifacts & Images
+# =========================
+wakedeck.tar
+*.tar
+*.iso
+
+# =========================
+# AI & Documentation Files
+# =========================
+# Ignore AI working document as requested
+DOCUMENTATION.md
+
+# =========================
+# OS & Editor Files
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
