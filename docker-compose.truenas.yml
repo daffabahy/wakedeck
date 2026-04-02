@@ -9,7 +9,7 @@ services:
     volumes:
       - /mnt/storage/Apps/wakedeck/data:/app/data
     environment:
-      - SECRET_KEY=_2dKMHDEBm8BC6ljTdrMHYM5c7LSWnVAmnNNFYE9Z9FVDitOIoUhQJkKPXfqInvq
+      - SECRET_KEY=<your-64-char-random-string>
       - PORT=36912
       - DATA_DIR=/app/data
     restart: unless-stopped
